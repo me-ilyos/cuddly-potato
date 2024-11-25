@@ -45,7 +45,10 @@ def create_main_window():
     crud_frame = ttk.Frame(cars_tab)
     crud_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
 
-    ttk.Button(crud_frame, text="Add New Car").grid(
+    # def adding_car():
+    #     return add_car(tree)
+
+    ttk.Button(crud_frame, command= lambda: add_car(tree), text="Add New Car").grid(
         row=0, column=0, pady=10, padx=5, sticky="ew"
     )
     ttk.Button(crud_frame, text="Edit Selected Car").grid(
@@ -59,6 +62,16 @@ def create_main_window():
     )
 
     return root
+
+
+def add_car(tree):
+    window = tk.Toplevel()
+    window.title("Add new car")
+    window.geometry("300x250")
+
+    ttk.Label(window, text="Make: ").grid(row=0, column=0)
+    make_input = ttk.Entry(window)
+    make_input.grid(row=0, column=1)
 
 
 def main():
