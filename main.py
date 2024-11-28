@@ -1,4 +1,6 @@
 import tkinter as tk
+import csv
+from tkinter import messagebox
 from tkinter import ttk
 
 
@@ -69,10 +71,57 @@ def add_car(tree):
     window.title("Add new car")
     window.geometry("300x250")
 
-    ttk.Label(window, text="Make: ").grid(row=0, column=0)
+    ttk.Label(window, text="Make: ").grid(row=0, column=0, padx=5, pady=5)
     make_input = ttk.Entry(window)
     make_input.grid(row=0, column=1)
 
+    ttk.Label(window, text="Model: ").grid(row=1, column=0, padx=5, pady=5)
+    model_input = ttk.Entry(window)
+    model_input.grid(row=1, column=1)
+
+    ttk.Label(window, text="Year: ").grid(row=2, column=0, padx=5, pady=5)
+    year_input = ttk.Entry(window)
+    year_input.grid(row=2, column=1)
+
+    ttk.Label(window, text="Price: ").grid(row=3, column=0, padx=5, pady=5)
+    price_input = ttk.Entry(window)
+    price_input.grid(row=3, column=1)
+
+    def save_car():
+        make = make_input.get()
+        model = model_input.get()
+        year = year_input.get()
+        price = price_input.get()
+
+        if not all([make, model, year, price]):
+            messagebox.showerror("Error", "Fill all fields")
+            return
+
+        try:
+            try:
+                with open('cars.csv', 'r') as file:
+                    reader = csv.reader(file)
+                    next(reader)
+
+                    cars = list(reader)
+                    next_id = str(len(cars) + 1)
+            except FileNotFoundError:
+                with open('cars.csv', 'w', newline='') as file:
+                    writer = csv.writer(file)
+                    writer.writerow(["ID", "Make", "Model", "Year", "Price"])
+                    next_id = "1"
+            
+            with open('cars.csv', 'a', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerow([next_id, make, model, year, price])
+            
+            tree.insert('', 'end', values=(next_id, make, model, year, price))
+            messagebox.showinfo("Succcess", "Car added successfully")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error occured: {str(e)}")
+    
+    ttk.Button(window, text='Save car', command=save_car).grid(row=4, column=0,
+        columnspan=2, pady=20)
 
 def main():
     root = create_main_window()
