@@ -44,9 +44,7 @@ def edit_car(tree):
 ```
 
 ## Main windowda
-
-```
-python
+```python
 
     # Asosiy oynaga tahrirlash tugmasini qo'shish
     ttk.Button(crud_frame, command=lambda: edit_car(tree), 
