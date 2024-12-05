@@ -54,9 +54,10 @@ def create_main_window():
         crud_frame, command=lambda: edit_car(tree), text="Edit Selected Car"
     ).grid(row=1, column=0, pady=10, padx=5, sticky="ew")
 
-    ttk.Button(crud_frame, text="Delete Selected Car").grid(
-        row=2, column=0, pady=10, padx=5, sticky="ew"
-    )
+    ttk.Button(
+        crud_frame, text="Delete Selected Car", command=lambda: delete_car(tree)
+    ).grid(row=2, column=0, pady=10, padx=5, sticky="ew")
+
     ttk.Button(crud_frame, text="Refresh List").grid(
         row=3, column=0, pady=10, padx=5, sticky="ew"
     )
@@ -198,6 +199,41 @@ def edit_car(tree):
     ttk.Button(window, text="Save Changes", command=save_changes).grid(
         row=4, column=0, columnspan=2, pady=20
     )
+
+
+def delete_car(tree):
+    selected_item = tree.selection()
+
+    if not selected_item:
+        messagebox.showerror("Error", "Please select a car to delete")
+        return
+
+    confirm = messagebox.askyesno(
+        "Confirm Delete", "Are you sure you want to delete this car?"
+    )
+
+    if confirm:
+        try:
+            car_values = tree.item(selected_item)["values"]
+            updated_cars = []
+
+            with open("cars.csv", "r") as file:
+                reader = csv.reader(file)
+                header = next(reader)
+                for row in reader:
+                    if row[0] != str(car_values[0]):
+                        updated_cars.append(row)
+
+            with open("cars.csv", "w", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerow(header)
+                writer.writerows(updated_cars)
+
+            tree.delete(selected_item)
+            messagebox.showinfo("Success", "Car deleted successfully")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {str(e)}")
 
 
 def main():
