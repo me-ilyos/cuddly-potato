@@ -47,15 +47,13 @@ def create_main_window():
     crud_frame = ttk.Frame(cars_tab)
     crud_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
 
-    # def adding_car():
-    #     return add_car(tree)
-
-    ttk.Button(crud_frame, command= lambda: add_car(tree), text="Add New Car").grid(
+    ttk.Button(crud_frame, command=lambda: add_car(tree), text="Add New Car").grid(
         row=0, column=0, pady=10, padx=5, sticky="ew"
     )
-    ttk.Button(crud_frame, text="Edit Selected Car").grid(
-        row=1, column=0, pady=10, padx=5, sticky="ew"
-    )
+    ttk.Button(
+        crud_frame, command=lambda: edit_car(tree), text="Edit Selected Car"
+    ).grid(row=1, column=0, pady=10, padx=5, sticky="ew")
+
     ttk.Button(crud_frame, text="Delete Selected Car").grid(
         row=2, column=0, pady=10, padx=5, sticky="ew"
     )
@@ -64,12 +62,12 @@ def create_main_window():
     )
 
     try:
-        with open('cars.csv', 'r') as file:
+        with open("cars.csv", "r") as file:
             reader = csv.reader(file)
             next(reader)
 
             for row in reader:
-                tree.insert('', 'end', values=row)
+                tree.insert("", "end", values=row)
     except FileNotFoundError:
         pass
 
@@ -109,29 +107,98 @@ def add_car(tree):
 
         try:
             try:
-                with open('cars.csv', 'r') as file:
+                with open("cars.csv", "r") as file:
                     reader = csv.reader(file)
                     next(reader)
 
                     cars = list(reader)
                     next_id = str(len(cars) + 1)
             except FileNotFoundError:
-                with open('cars.csv', 'w', newline='') as file:
+                with open("cars.csv", "w", newline="") as file:
                     writer = csv.writer(file)
                     writer.writerow(["ID", "Make", "Model", "Year", "Price"])
                     next_id = "1"
-            
-            with open('cars.csv', 'a', newline='') as file:
+
+            with open("cars.csv", "a", newline="") as file:
                 writer = csv.writer(file)
                 writer.writerow([next_id, make, model, year, price])
-            
-            tree.insert('', 'end', values=(next_id, make, model, year, price))
+
+            tree.insert("", "end", values=(next_id, make, model, year, price))
             messagebox.showinfo("Succcess", "Car added successfully")
         except Exception as e:
             messagebox.showerror("Error", f"Error occured: {str(e)}")
-    
-    ttk.Button(window, text='Save car', command=save_car).grid(row=4, column=0,
-        columnspan=2, pady=20)
+
+    ttk.Button(window, text="Save car", command=save_car).grid(
+        row=4, column=0, columnspan=2, pady=20
+    )
+
+
+def edit_car(tree):
+    selected_item = tree.selection()
+    if not selected_item:
+        messagebox.showerror("Error", "Please select a car to edit")
+        return
+
+    car_values = tree.item(selected_item)["values"]
+
+    window = tk.Toplevel()
+    window.title("Edit Car")
+    window.geometry("300x250")
+
+    ttk.Label(window, text="Make: ").grid(row=0, column=0, padx=5, pady=5)
+    make_input = ttk.Entry(window)
+    make_input.insert(0, car_values[1])
+    make_input.grid(row=0, column=1)
+
+    ttk.Label(window, text="Model: ").grid(row=1, column=0, padx=5, pady=5)
+    model_input = ttk.Entry(window)
+    model_input.insert(0, car_values[2])
+    model_input.grid(row=1, column=1)
+
+    ttk.Label(window, text="Year: ").grid(row=2, column=0, padx=5, pady=5)
+    year_input = ttk.Entry(window)
+    year_input.insert(0, car_values[3])
+    year_input.grid(row=2, column=1)
+
+    ttk.Label(window, text="Price: ").grid(row=3, column=0, padx=5, pady=5)
+    price_input = ttk.Entry(window)
+    price_input.insert(0, car_values[4])
+    price_input.grid(row=3, column=1)
+
+    def save_changes():
+        make = make_input.get()
+        model = model_input.get()
+        year = year_input.get()
+        price = price_input.get()
+
+        if not all([make, model, year, price]):
+            messagebox.showerror("Error", "Fill all fields")
+            return
+
+        try:
+            with open("cars.csv", "r") as file:
+                cars = list(csv.reader(file))
+
+            for car in cars:
+                if car[0] == str(car_values[0]):
+                    car[1:] = [make, model, year, price]
+                    break
+
+            with open("cars.csv", "w", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerows(cars)
+
+            tree.item(selected_item, values=(car_values[0], make, model, year, price))
+            messagebox.showinfo("Success", "Car updated successfully")
+            window.destroy()
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Error occurred: {str(e)}")
+
+    ttk.Button(window, text="Save Changes", command=save_changes).grid(
+        row=4, column=0, columnspan=2, pady=20
+    )
+
 
 def main():
     root = create_main_window()
