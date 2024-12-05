@@ -63,6 +63,16 @@ def create_main_window():
         row=3, column=0, pady=10, padx=5, sticky="ew"
     )
 
+    try:
+        with open('cars.csv', 'r') as file:
+            reader = csv.reader(file)
+            next(reader)
+
+            for row in reader:
+                tree.insert('', 'end', values=row)
+    except FileNotFoundError:
+        pass
+
     return root
 
 
